@@ -1,4 +1,8 @@
-import { CommandInteraction, MessageFlags, SlashCommandBuilder } from "discord.js";
+import {
+  CommandInteraction,
+  MessageFlags,
+  SlashCommandBuilder,
+} from "discord.js";
 import { usersTable } from "../db/schema";
 import db from "../dbclient";
 
@@ -16,17 +20,21 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction: CommandInteraction) {
   const { id, globalName } = interaction.user;
-  const rawBday = interaction.options.getString('birthdate');
-  const bday = Temporal.PlainDate.from(rawBday);
-
-  if (!bday){
-    return interaction.reply({content:`I don't understand the date ${rawBday}, sorry. Try again in YYYY-MM-DD format.`, flags: MessageFlags.Ephemeral});    
+  const rawBday = interaction.options.getString("birthdate");
+  let bday;
+  try {
+    bday = Temporal.PlainDate.from(rawBday);
+  } catch (e) {
+    return interaction.reply({
+      content: `I don't understand the date ${rawBday}, sorry. Try again in YYYY-MM-DD format.`,
+      flags: MessageFlags.Ephemeral,
+    });
   }
 
   const user: typeof usersTable.$inferInsert = {
     discord_user_id: id,
     name: globalName || "(no global name)",
-    birthday: bday.toString()
+    birthday: bday.toString(),
   };
   await db
     .insert(usersTable)
@@ -43,11 +51,14 @@ export async function execute(interaction: CommandInteraction) {
     "Thursday",
     "Friday",
     "Saturday",
-    "Sunday"
+    "Sunday",
   ];
-    
-  const formattedBirthday = bday.toLocaleString("en-us", {dateStyle:"long"});
+
+  const formattedBirthday = bday.toLocaleString("en-us", { dateStyle: "long" });
   const dayName = dayNames[bday.dayOfWeek - 1];
-  console.log(`Set birthday for ${globalName}: ${formattedBirthday}`)
-  return interaction.reply({content:`Tada! Your birthday is set to ${formattedBirthday}! \nOh, and you were born on a ${dayName}!`, flags: MessageFlags.Ephemeral});
+  console.log(`Set birthday for ${globalName}: ${formattedBirthday}`);
+  return interaction.reply({
+    content: `Tada! Your birthday is set to ${formattedBirthday}! \nOh, and you were born on a ${dayName}!`,
+    flags: MessageFlags.Ephemeral,
+  });
 }
