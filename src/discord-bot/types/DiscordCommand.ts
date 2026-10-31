@@ -1,10 +1,8 @@
 import {
   ChatInputCommandInteraction,
   InteractionResponse,
-  MessageContextMenuCommandInteraction,
   SlashCommandBuilder,
   SlashCommandOptionsOnlyBuilder,
-  UserContextMenuCommandInteraction,
 } from "discord.js";
 
 export type DiscordCommand = {
